@@ -1,86 +1,83 @@
 <!DOCTYPE html>
 <html lang="ko">
 
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>LOL 메인화면</title>
-        <meta name="author" content="학번">
-        <meta name="keywords" content="computer">
-        <base href="http:127.0.0.1:5500">
-    </head>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">홈페이지</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">메인페이지</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">기본정보</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">챔피언</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                고객지원
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">게임 다운로드</a></li>
-                <li><a class="dropdown-item" href="#">롤 커뮤니티</a></li>
-                <li><a class="dropdown-item" href="#">깃 허브 페이지</a></li>
-              </ul>
-            </li>
-          </ul>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메뉴 추천</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="C:\Users\sunwo\main\image\logo.png" alt="Brand Logo" style="height: 30px;">
+            </a>
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="menu.html" target="_blank">메뉴 카테고리</a>
+                </li>
+                <li class="nav-item">
+                    <!-- 새로운 페이지 map.html로 이동 -->
+                    <a class="nav-link" href="map.html" target="_blank">맛집</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="support.html" target="_blank">고객지원</a>
+                </li>
+                
+            </ul>
         </div>
-      </div>
     </nav>
-    <body style="background-color: black;">
-      <!--<div style="display: flex; justify-content: center;">
-        <img src="image/LOGO.png" width="200" height="60">
-        <h3 style="font-size: 24px; font-weight: bold; font-style: italic; color: white; font-family: '굴림';"><a href="https://www.leagueoflegends.com/ko-kr/how-to-play/" target="_blank"> 게임정보 </a> 기본정보   챔피언   패치 노트  새소식  다운로드</h3>
-      </div>
-    -->
-      
-      <hr>
-      <div style="display: flex; justify-content: center;">
-        <a href="index.html" target="_blank">
-          <img src="image/MAIN.jpg" width="1200" height="768">
-        </a>
-      </div>
-      
-      <style>
-        table {
-          font-size: 20pt;
-          color:white;
-        }
-      </style>
-      <div style="display: flex; justify-content: center;">
-        <table border="1">
-          <caption>인기 캐릭터</caption>
-          <tbody>
-            <tr>
-              <td>아리</td>
-              <td>가렌</td>
-              <td>바이</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <hr>
-      <div style="display: flex; justify-content: center;">
-        <h3 style="font-size: 24px; font-weight: bold; font-style: italic; color: white; font-family: '굴림';">라이엇 게임 회사 정보</h3>
-      </div>
+    <div class="container mt-5">
+        <h1 class="text-center">메뉴 추천</h1>
+        <div class="input-group mt-4">
+            <input type="text" id="userInput" class="form-control" placeholder="질문을 입력하세요">
+            <button class="btn btn-primary" id="submitButton">추천 받기</button>
+        </div>
+        <div id="responseArea" class="text-center mt-4" style="font-size: 1.5rem; font-weight: bold;"></div>
+    </div>
 
+    <script>
+        document.getElementById("submitButton").addEventListener("click", async () => {
+            const userInput = document.getElementById("userInput").value.trim();
+            const responseArea = document.getElementById("responseArea");
 
+            if (!userInput) {
+                alert("질문을 입력해주세요!");
+                return;
+            }
 
-      
+            responseArea.textContent = "응답을 가져오는 중...";
 
-    </body>
+            try {
+                const response = await fetch("http://localhost:3000/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userInput })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const answer = data.answer;
+
+                    // 맛집 추천에 포함된 링크가 있을 경우 클릭할 수 있도록 처리
+                    if (answer.includes("웹사이트")) {
+                        const [restaurant, website] = answer.split("\n");
+                        responseArea.innerHTML = `${restaurant}<br><a href="${website}" target="_blank">${website}</a>`;
+                    } else {
+                        responseArea.textContent = answer;
+                    }
+                } else {
+                    responseArea.textContent = `에러 발생: ${response.statusText}`;
+                }
+            } catch (error) {
+                responseArea.textContent = `요청 실패: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+
 </html>
+
